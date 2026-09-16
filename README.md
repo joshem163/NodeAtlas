@@ -1,8 +1,8 @@
 # Node Signal Atlas (NSA)
 
-**Node Signal Atlas: Characterizing Node Classification Beyond Homophily**
+**Node Signal Atlas: Mapping Predictive Signal Beyond Homophily**
 
-*Submitted to NeurIPS 2026*
+*Submitted to ICLR 2027*
 
 NSA is a pre-training diagnostic framework that embeds a node classification dataset into a three-dimensional signal space:
 
@@ -61,12 +61,12 @@ python run_baselines.py --device cuda:0 --runs 10
 python run_synthetics.py
 ```
 
-## Benchmark Suite (18 datasets)
+## Benchmark Suite (20 datasets)
 
 | Category | Datasets |
 |---|---|
 | Heterophilic | Roman-Empire, Texas, Wisconsin, Squirrel-filtered, Cornell, Actor, Squirrel, Flickr, Chameleon-filtered, Chameleon, Amazon-Ratings, BlogCatalog |
-| Homophilic | Deezer-Europe, CiteSeer, PubMed, Amazon-Computers, Cora, Amazon-Photo |
+| Homophilic | Genius, OGBN-Arxiv, Deezer-Europe, CiteSeer, PubMed, Amazon-Computers, Cora, Amazon-Photo |
 
 ## Baseline Models
 
@@ -90,8 +90,8 @@ python run_synthetics.py
 @inproceedings{nsa2026,
   title={Node Signal Atlas: Characterizing Node Classification Beyond Homophily},
   author={Anonymous},
-  booktitle={Submitted to NeurIPS 2026},
-  year={2026}
+  booktitle={Submitted to ICLR 2027},
+  year={2027}
 }
 ```
 
