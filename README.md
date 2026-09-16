@@ -19,10 +19,10 @@ NSA/
 ├── descriptors.py          # Core: FSS/TSS/LSS descriptors + probe
 ├── synthetics.py           # 8 corner + 16 sweep synthetic dataset generators
 ├── models.py               # 9 baseline models (MLP, LP, GCN, H2GCN, GPS, SGFormer, APPNP, SAGE, SGC)
-├── benchmarks.py           # 18 real benchmark dataset loader + metadata
+├── benchmarks.py           # 20 real benchmark dataset loader + metadata
 ├── run_synthetics.py       # Synthetic experiment runner
 ├── run_baselines.py        # Benchmark runner (NSA scores + 9 models x 10 seeds)
-├── benchmark_npz_all/      # Pre-cached .npz dataset files (18 datasets)
+├── benchmark_npz_all/      # Pre-cached .npz dataset files (20 datasets)
 └── README.md
 ```
 
