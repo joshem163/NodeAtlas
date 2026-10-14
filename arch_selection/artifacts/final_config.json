@@ -1,0 +1,98 @@
+{
+  "synthetic_n": 512,
+  "n_classes": 3,
+  "train_problems_per_mechanism": 30,
+  "test_problems_per_mechanism": 15,
+  "model_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "pilot_train_per_mechanism": 6,
+  "pilot_test_per_mechanism": 6,
+  "pilot_model_seeds": [
+    0,
+    1
+  ],
+  "meta_ridge_alpha": 1.0,
+  "random_baseline_draws": 500,
+  "cache_dir": "cache/v5",
+  "exclude_architectures": [],
+  "max_winner_share": 0.45,
+  "min_distinct_winners": 4,
+  "min_constant_regret": 0.05,
+  "min_median_spread": 0.08,
+  "min_fraction_spread_gt_005": 0.7,
+  "max_fixed_top3_hit": 0.8,
+  "min_median_best_second_gap": 0.01,
+  "arch": {
+    "mlp": {
+      "hidden": 64,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 300,
+      "patience": 50,
+      "dropout": 0.5,
+      "hops": 10,
+      "alpha": 0.1,
+      "h2_layers": 2
+    },
+    "gcn": {
+      "hidden": 64,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 300,
+      "patience": 50,
+      "dropout": 0.5,
+      "hops": 10,
+      "alpha": 0.1,
+      "h2_layers": 2
+    },
+    "sage": {
+      "hidden": 64,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 300,
+      "patience": 50,
+      "dropout": 0.5,
+      "hops": 10,
+      "alpha": 0.1,
+      "h2_layers": 2
+    },
+    "appnp": {
+      "hidden": 64,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 300,
+      "patience": 50,
+      "dropout": 0.5,
+      "hops": 10,
+      "alpha": 0.1,
+      "h2_layers": 2
+    },
+    "h2gcn": {
+      "hidden": 64,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 300,
+      "patience": 50,
+      "dropout": 0.5,
+      "hops": 10,
+      "alpha": 0.1,
+      "h2_layers": 2
+    },
+    "gin": {
+      "hidden": 64,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 300,
+      "patience": 50,
+      "dropout": 0.5,
+      "hops": 10,
+      "alpha": 0.1,
+      "h2_layers": 2
+    }
+  }
+}

@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PyG dataset cache
+/tmp/
+
+# Claude Code
+.claude/
+
+# Output files
+*.csv
+
+# Large npz files (>100MB) -- use PyG fallback for these
+benchmark_npz_all/deezer_europe.npz
+
+# Results and caches produced by the runners
+results/
+logs/
+ogb_data/
+linkx_data/

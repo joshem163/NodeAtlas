@@ -1,20 +1,15 @@
 """
 Benchmark Metadata & Data Loader for Node Signal Atlas (NSA)
 =============================================================
-Single entry point for all 18 benchmark datasets (Table 6 in paper).
-
-Dataset sources:
-  WebKB [PWC+19], multi-scale attributed node embeddings [RAS21],
-  heterophilous benchmarks [PKD+23], citation networks [MNRS00],
-  co-purchase graphs [SMBG18].
+Single entry point for all 23 benchmark datasets.
 
 Metadata:
   DATASET_INFO  -- (N, E, d, C, h_edge, h_node, category) per dataset
-  ALL_DATASETS  -- ordered list by node homophily
+  ALL_DATASETS  -- ordered list of all dataset names
 
 Loading priority:
   1. Local npz files in benchmark_npz_all/  (fast, offline, reproducible)
-  2. PyG download fallback                  (for missing npz)
+  2. PyG / OGB / LINKX download fallback    (for datasets without a local npz)
 
 All loaders return the same format:
   edge_index:  (2, E) numpy int64
@@ -37,41 +32,53 @@ import numpy as np
 
 # Canonical dataset metadata: (N, E, d, C, h_edge, h_node, category)
 DATASET_INFO = {
-    # Heterophilic
-    'roman-empire':       (22662,  32927,     300,    18, 0.047, 0.046, 'heterophilic'),
-    'texas':              (183,    309,       1703,   5,  0.062, 0.056, 'heterophilic'),
-    'wisconsin':          (251,    499,       1703,   5,  0.170, 0.099, 'heterophilic'),
-    'squirrel-filtered':  (2223,   46998,     2089,   5,  0.207, 0.191, 'heterophilic'),
-    'cornell':            (183,    295,       1703,   5,  0.298, 0.200, 'heterophilic'),
-    'actor':              (7600,   33544,     931,    5,  0.216, 0.202, 'heterophilic'),
-    'squirrel':           (5201,   217073,    2089,   5,  0.223, 0.215, 'heterophilic'),
-    'flickr':             (7575,   239738,    12047,  9,  0.239, 0.243, 'heterophilic'),
-    'chameleon-filtered': (890,    8854,      2325,   5,  0.236, 0.244, 'heterophilic'),
-    'chameleon':          (2277,   36101,     2325,   5,  0.234, 0.247, 'heterophilic'),
-    'amazon-ratings':     (24492,  93050,     300,    5,  0.380, 0.376, 'heterophilic'),
-    'blogcatalog':        (5196,   171743,    8189,   6,  0.401, 0.391, 'heterophilic'),
+    # Heterophilic -- Malignant
+    'cornell':            (183,    295,       1703,   5,  0.298, 0.200, 'het-malignant'),
+    'wisconsin':          (251,    499,       1703,   5,  0.170, 0.099, 'het-malignant'),
+    'texas':              (183,    309,       1703,   5,  0.062, 0.056, 'het-malignant'),
+    'actor':              (7600,   33544,     931,    5,  0.216, 0.202, 'het-malignant'),
+    'deezer-europe':      (28281,  92752,     31241,  2,  0.525, 0.530, 'het-malignant'),
+    'roman-empire':       (22662,  32927,     300,    18, 0.047, 0.046, 'het-malignant'),
+    'blogcatalog':        (5196,   171743,    8189,   6,  0.401, 0.391, 'het-malignant'),
+    'flickr':             (7575,   239738,    12047,  9,  0.239, 0.243, 'het-malignant'),
+    # Heterophilic -- Benign
+    'chameleon':          (2277,   36101,     2325,   5,  0.234, 0.247, 'het-benign'),
+    'squirrel':           (5201,   217073,    2089,   5,  0.223, 0.215, 'het-benign'),
+    'chameleon-filtered': (890,    8854,      2325,   5,  0.236, 0.244, 'het-benign'),
+    'amazon-ratings':     (24492,  93050,     300,    5,  0.380, 0.376, 'het-benign'),
+    # Heterophilic -- Ambiguous
+    'squirrel-filtered':  (2223,   46998,     2089,   5,  0.207, 0.191, 'het-ambiguous'),
     # Homophilic
-    'deezer-europe':      (28281,  92752,     31241,  2,  0.525, 0.530, 'homophilic'),
+    'cora':               (2708,   5429,      1433,   7,  0.810, 0.825, 'homophilic'),
     'citeseer':           (3327,   4732,      3703,   6,  0.736, 0.706, 'homophilic'),
     'pubmed':             (19717,  44338,     500,    3,  0.802, 0.792, 'homophilic'),
-    'amazon-computers':   (13752,  245861,    767,    10, 0.780, 0.800, 'homophilic'),
-    'cora':               (2708,   5429,      1433,   7,  0.810, 0.825, 'homophilic'),
-    'amazon-photo':       (7650,   119081,    745,    8,  0.830, 0.850, 'homophilic'),
+    'amazon-photo':       (7650,   119081,    745,    8,  0.827, 0.849, 'homophilic'),
+    'amazon-computers':   (13752,  245861,    767,    10, 0.777, 0.802, 'homophilic'),
+    # Added 2026-09: measured on the loaded graph after ToUndirected().
+    'ogbn-arxiv':         (169343, 2315598,   128,    40, 0.654, 0.635, 'homophilic'),
+    # genius (LINKX, Lim et al. NeurIPS 2021). Measured after symmetrisation.
+    'genius':             (421961, 1845736,   12,     2,  0.593, 0.509, 'het-malignant'),
 }
 
 DATASET_GROUPS = {
-    'heterophilic': ['roman-empire', 'texas', 'wisconsin', 'squirrel-filtered',
-                     'cornell', 'actor', 'squirrel', 'flickr',
-                     'chameleon-filtered', 'chameleon', 'amazon-ratings',
-                     'blogcatalog'],
-    'homophilic':   ['deezer-europe', 'citeseer', 'pubmed',
-                     'amazon-computers', 'cora', 'amazon-photo'],
+    'het-malignant': ['cornell', 'wisconsin', 'texas', 'actor',
+                      'deezer-europe', 'roman-empire', 'blogcatalog', 'flickr',
+                      'genius'],
+    'het-benign':    ['chameleon', 'squirrel', 'chameleon-filtered',
+                      'amazon-ratings'],
+    'het-ambiguous': ['squirrel-filtered'],
+    'homophilic':    ['cora', 'citeseer', 'pubmed',
+                      'amazon-photo', 'amazon-computers',
+                      'ogbn-arxiv'],
 }
 
 ALL_DATASETS = (
-    DATASET_GROUPS['heterophilic'] +
+    DATASET_GROUPS['het-malignant'] +
+    DATASET_GROUPS['het-benign'] +
+    DATASET_GROUPS['het-ambiguous'] +
     DATASET_GROUPS['homophilic']
 )
+
 
 
 def dataset_category(name: str) -> str:
@@ -149,6 +156,14 @@ def load_dataset(name, npz_dir=NPZ_DIR):
     """
     name = name.lower().replace('_', '-')
 
+    # OGB datasets have their own loader
+    if name.startswith('ogbn-'):
+        return _load_ogb(name)
+
+    if name == 'genius':
+        return _load_linkx('genius')
+
+
     # Try local npz first
     npz_file = os.path.join(npz_dir, f"{name.replace('-', '_')}.npz")
     if os.path.exists(npz_file):
@@ -176,6 +191,56 @@ def _load_npz(path):
     edge_index = _symmetrize_and_clean(edge_index)
     num_classes = _count_classes(y)
     return edge_index, X, y, num_classes
+
+
+
+def _load_linkx(name, root=None):
+    """Load a LINKX dataset (Lim et al., NeurIPS 2021) via PyG.
+
+    Downloads on first use. Override the cache location with
+    NSA_LINKX_ROOT (default: ./linkx_data).
+    """
+    root = root or os.environ.get('NSA_LINKX_ROOT', 'linkx_data')
+    import torch
+    from torch_geometric.datasets import LINKXDataset
+    from torch_geometric.data.data import Data, DataEdgeAttr, DataTensorAttr
+    from torch_geometric.data.storage import GlobalStorage, NodeStorage, EdgeStorage
+    torch.serialization.add_safe_globals(
+        [Data, DataEdgeAttr, DataTensorAttr, GlobalStorage, NodeStorage, EdgeStorage])
+    d = LINKXDataset(root=root, name=name)[0]
+    X = d.x.numpy().astype(np.float32)
+    y = d.y.numpy().reshape(-1).astype(int)
+    edge_index = _symmetrize_and_clean(d.edge_index.numpy().astype(np.int64))
+    return edge_index, X, y, _count_classes(y)
+
+
+def _load_ogb(name, root=None):
+    """Load an OGB node-property-prediction dataset.
+
+    ToUndirected() is applied because published ogbn-arxiv numbers assume it.
+    Labels arrive as (N, 1) and are flattened to (N,).
+
+    Downloads on first use. Override the cache location with
+    NSA_OGB_ROOT (default: ./ogb_data).
+    """
+    root = root or os.environ.get('NSA_OGB_ROOT', 'ogb_data')
+    import torch
+    from ogb.nodeproppred import PygNodePropPredDataset
+    import torch_geometric.transforms as T
+
+    # torch>=2.6 defaults torch.load(weights_only=True); OGB reloads its cached
+    # PyG objects with a plain torch.load, so allowlist the PyG containers.
+    from torch_geometric.data.data import Data, DataEdgeAttr, DataTensorAttr
+    from torch_geometric.data.storage import GlobalStorage, NodeStorage, EdgeStorage
+    torch.serialization.add_safe_globals(
+        [Data, DataEdgeAttr, DataTensorAttr, GlobalStorage, NodeStorage, EdgeStorage])
+
+    ds = PygNodePropPredDataset(name=name, root=root, transform=T.ToUndirected())
+    data = ds[0]
+    X = data.x.numpy().astype(np.float32)
+    y = data.y.numpy().reshape(-1).astype(int)
+    edge_index = _symmetrize_and_clean(data.edge_index.numpy().astype(np.int64))
+    return edge_index, X, y, _count_classes(y)
 
 
 def _load_pyg(name):

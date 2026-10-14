@@ -99,6 +99,8 @@ def stratified_split(y, train_ratio=0.6, val_ratio=0.2, seed=42):
     set_seed(seed)
     tr, va, te = [], [], []
     for c in torch.unique(y):
+        if int(c) < 0:      # skip unlabeled nodes (y < 0)
+            continue
         idx = (y == c).nonzero(as_tuple=False).view(-1)
         idx = idx[torch.randperm(idx.size(0))]
         n = idx.size(0)
@@ -569,11 +571,16 @@ def grid_search_lp(data, tr, va, te, num_cls, metric):
     train_mask = torch.zeros(N, dtype=torch.bool)
     train_mask[tr] = True
 
+    # Unlabeled nodes (y < 0) would index out of bounds in the one-hot
+    # encoding. They are excluded from train_mask, so propagation only ever
+    # reads labels of training nodes; the placeholder value is unused.
+    y_lp = y.clamp(min=0)
+
     best_val, best_test, best_alpha = -1e9, 0.0, 0.5
 
     for alpha in LP_ALPHA_GRID:
         lp = LabelPropagation(num_layers=LP_ITERS, alpha=alpha)
-        Yh = lp(y, ei, mask=train_mask)
+        Yh = lp(y_lp, ei, mask=train_mask)
         Yh_np = Yh.numpy()
         va_np = va.numpy()
         te_np = te.numpy()
